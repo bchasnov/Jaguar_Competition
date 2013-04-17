@@ -123,7 +123,7 @@ namespace DrRobot.JaguarControl
 
         void ImportTraj()
         {
-            String[] allLines = File.ReadAllLines(@"..\..\..\..\traj.csv");
+            String[] allLines = File.ReadAllLines(@"..\..\..\traj.csv");
 
             foreach (string s in allLines)
             {
@@ -171,7 +171,7 @@ namespace DrRobot.JaguarControl
             numMapSegments = 0;
             mapSegmentCorners = new double[1000, 2, 2]; 
 
-            String[] allLines = File.ReadAllLines(@"..\..\..\..\map.csv");
+            String[] allLines = File.ReadAllLines(@"..\..\..\map.csv");
             string section = "";
             double prevX = 0;
             double prevY = 0;
