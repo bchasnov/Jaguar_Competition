@@ -85,7 +85,7 @@ namespace DrRobot.JaguarControl
         //public Particle[] propagatedParticles;
         public Particle[] tempParticles;
         public int tempParticlesCount = 0;
-        public int numParticles = 1000;
+        public int numParticles = 10000;
         public double K_wheelRandomness = 0.15;//0.25
         public Random random = new Random();
         public bool newLaserData = false;
@@ -128,6 +128,7 @@ namespace DrRobot.JaguarControl
         public int trajSize, trajCurrentNode, numNodes;
 
         IPhoneSensor iPhoneSensor = new IPhoneSensor(5555);
+        Gps myGps;
 
         public class Node
         {
@@ -173,6 +174,7 @@ namespace DrRobot.JaguarControl
         {
             // Initialize vars
             jaguarControl = jc;
+            myGps = new Gps(jc);
             realJaguar = jc.realJaguar;
             simulatedJaguar = jc.simulatedJaguar;
             map = new Map();
@@ -209,6 +211,7 @@ namespace DrRobot.JaguarControl
             if (!map.trajectory.empty())
             {
                 JagPoint start = map.trajectory.getTargetPoint();
+                
                 initialX = start.x;
                 initialY = start.y;
                 initialT = start.theta;
@@ -484,11 +487,17 @@ namespace DrRobot.JaguarControl
             {
                 t_gps = iPhoneSensor.Theta();
             }
-            if (iPhoneSensor.newGps)
+            if (false)//iPhoneSensor.newGps)
             {
                 x_gps = iPhoneSensor.GPSx();
                 y_gps = iPhoneSensor.GPSy();
             }
+
+            myGps.updateGps();
+            x_gps = myGps.getX();
+            y_gps = myGps.getY();
+
+            Console.WriteLine(iPhoneSensor.latitude + " " + iPhoneSensor.longitude + " " + x_gps + " " + y_gps);
 
             // For simulations, update the simulated measurements
             if (jaguarControl.Simulating())
@@ -710,7 +719,9 @@ namespace DrRobot.JaguarControl
             {
                 TimeSpan ts = DateTime.Now - startTime;
                 time = ts.TotalSeconds;
-                 String newData = time.ToString() + " " + x.ToString() + " " + y.ToString() + " " + t.ToString() ;
+                String newData = time.ToString() + " " + x_gps + " " + y_gps + " " + iPhoneSensor.latitude + " " + iPhoneSensor.longitude;//x.ToString() + " " + y.ToString() + " " + t.ToString() ;
+
+               
 
                 logFile.WriteLine(newData);
             }
@@ -1227,7 +1238,7 @@ namespace DrRobot.JaguarControl
                 //calculate unnormalized weight
                 for (int i = 0; i < numParticles; i++)
                 {
-                    CalculateWeight_improved(i);
+                    CalculateWeight(i);
                 }
                 ttime("calculate weight");
                 //calculate normalized weight
@@ -1453,12 +1464,34 @@ namespace DrRobot.JaguarControl
         // things easier.
 
         Random myRandom = new Random();
+        public int randomParticleMode = PART_AROUND_XYT;
+        public const int PART_EVERYWHERE = 0;
+        public const int PART_AROUND_XY = 1;
+        public const int PART_AROUND_XYT = 2;
+        public int PART_xyrandomness = 2;
+        public double PART_trandomness = 0.02;
+
 
         void SetRandomPos(int p)
         {
-            particles[p].x = map.minX + myRandom.NextDouble() * (map.maxX - map.minX);
-            particles[p].y = map.minY + myRandom.NextDouble() * (map.maxY - map.minY);
-            particles[p].t = myRandom.NextDouble() * Math.PI * 2;
+            switch (randomParticleMode)
+            {
+                case PART_EVERYWHERE:
+                    particles[p].x = map.minX + myRandom.NextDouble() * (map.maxX - map.minX);
+                    particles[p].y = map.minY + myRandom.NextDouble() * (map.maxY - map.minY);
+                    particles[p].t = myRandom.NextDouble() * Math.PI * 2;
+                    break;
+                case PART_AROUND_XYT:
+                    particles[p].x = x + RandomGaussian() * PART_xyrandomness;
+                    particles[p].y = y + RandomGaussian() * PART_xyrandomness;
+                    particles[p].t = iPhoneSensor.Theta() + RandomGaussian() * 3.1415 *PART_trandomness;
+                    break;
+                case PART_AROUND_XY:
+                    particles[p].x = x + RandomGaussian() * PART_xyrandomness;
+                    particles[p].y = y + RandomGaussian() * PART_xyrandomness;
+                    particles[p].t = myRandom.NextDouble() * Math.PI * 2;
+                    break;
+            }
 
             particles[p].w = 1 / numParticles;
         }

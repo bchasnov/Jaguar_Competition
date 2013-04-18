@@ -83,6 +83,7 @@
       <DependentUpon>DrRobotRobotConnection.cs</DependentUpon>
     </Compile>
     <Compile Include="GoogleEarth.cs" />
+    <Compile Include="gps.cs" />
     <Compile Include="IMUGPSComm.cs">
       <SubType>Form</SubType>
     </Compile>

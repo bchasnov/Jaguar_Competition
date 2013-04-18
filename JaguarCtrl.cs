@@ -1315,5 +1315,20 @@ namespace DrRobot.JaguarControl
             pe.Show();
         }
 
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void trackTrajNumber_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txt = sender as TextBox;
+            if (txt != null)
+            {
+
+                navigation.map.trajectory.setTarget(Convert.ToInt16(txt.Text));
+            }
+        }
+
     }
 }

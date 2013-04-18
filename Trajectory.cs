@@ -91,6 +91,10 @@ namespace DrRobot.JaguarControl
             return points[index];
         }
 
+        public void setTarget(int i)
+        {
+            index = Math.Min(i, points.Count -1);
+        }
 
         public Boolean empty()
         {

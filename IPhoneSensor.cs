@@ -25,8 +25,8 @@ namespace DrRobot.JaguarControl
         private double headingDegrees = 0;
         private double headingTheta = 0;
 
-        private double lat = 0;
-        private double lon = 0;
+        public double latitude = 0;
+        public double longitude = 0;
         public double horizontalAccuracy = 65;
         public double verticalAccuracy = 10;
 
@@ -49,12 +49,12 @@ namespace DrRobot.JaguarControl
         
         public double GPSx()
         {
-            return lonToX(lon, lat) - xGPSZero;
+            return lonToX(longitude, latitude) - xGPSZero;
         }
 
         public double GPSy()
         {
-            return latToY(lat) - yGPSZero;
+            return latToY(latitude) - yGPSZero;
         }
 
         public void updateReadings()
@@ -92,8 +92,8 @@ namespace DrRobot.JaguarControl
                     case 1:
                         //GPS
                         newGps = true;
-                        lat = Convert.ToDouble(data[2]);
-                        lon = Convert.ToDouble(data[3]);
+                        latitude = Convert.ToDouble(data[2]);
+                        longitude = Convert.ToDouble(data[3]);
                         horizontalAccuracy = Convert.ToDouble(data[5]);
                         verticalAccuracy = Convert.ToDouble(data[5]);
                         break;

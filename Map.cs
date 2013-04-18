@@ -127,7 +127,7 @@ namespace DrRobot.JaguarControl
 
             foreach (string s in allLines)
             {
-                Console.WriteLine(s);
+                //Console.WriteLine(s);
                 string[] line = s.Split(',');
                 string name = line[0];
                 double x = 0;
@@ -177,7 +177,7 @@ namespace DrRobot.JaguarControl
             double prevY = 0;
             foreach (string s in allLines)
             {
-                Console.WriteLine(s);
+                //Console.WriteLine(s);
                 string[] line = s.Split(',');
                 string name = line[0];
                 double x = 0;
@@ -189,7 +189,7 @@ namespace DrRobot.JaguarControl
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                     continue;
                 }
 

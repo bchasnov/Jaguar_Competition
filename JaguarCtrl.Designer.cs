@@ -113,6 +113,7 @@
             this.checkBoxKnownStart = new System.Windows.Forms.CheckBox();
             this.trackTraj = new System.Windows.Forms.Button();
             this.PE = new System.Windows.Forms.Button();
+            this.trackTrajNumber = new System.Windows.Forms.TextBox();
             this.groupBoxGPSIMU.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.realJaguar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxIMUGPS)).BeginInit();
@@ -1057,12 +1058,21 @@
             this.PE.UseVisualStyleBackColor = true;
             this.PE.Click += new System.EventHandler(this.PE_Click);
             // 
+            // trackTrajNumber
+            // 
+            this.trackTrajNumber.Location = new System.Drawing.Point(637, 12);
+            this.trackTrajNumber.Name = "trackTrajNumber";
+            this.trackTrajNumber.Size = new System.Drawing.Size(36, 20);
+            this.trackTrajNumber.TabIndex = 76;
+            this.trackTrajNumber.TextChanged += new System.EventHandler(this.trackTrajNumber_TextChanged);
+            // 
             // JaguarCtrl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(1016, 698);
+            this.Controls.Add(this.trackTrajNumber);
             this.Controls.Add(this.PE);
             this.Controls.Add(this.trackTraj);
             this.Controls.Add(this.txtNumParticles);
@@ -1233,6 +1243,7 @@
         private System.Windows.Forms.CheckBox checkBoxKnownStart;
         private System.Windows.Forms.Button trackTraj;
         private System.Windows.Forms.Button PE;
+        private System.Windows.Forms.TextBox trackTrajNumber;
     }
 }
 
