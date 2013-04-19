@@ -114,6 +114,14 @@
             this.trackTraj = new System.Windows.Forms.Button();
             this.PE = new System.Windows.Forms.Button();
             this.trackTrajNumber = new System.Windows.Forms.TextBox();
+            this.iPhoneHeading = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.RotOnSpot = new System.Windows.Forms.Button();
+            this.autoModeText = new System.Windows.Forms.TextBox();
+            this.Follow = new System.Windows.Forms.Button();
+            this.ApproachWall = new System.Windows.Forms.Button();
+            this.AlignWall = new System.Windows.Forms.Button();
+            this.FindWall = new System.Windows.Forms.Button();
             this.groupBoxGPSIMU.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.realJaguar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxIMUGPS)).BeginInit();
@@ -444,18 +452,18 @@
             this.panel1.Controls.Add(this.pictureBoxLaser);
             this.panel1.Controls.Add(this.pictureBoxSensor);
             this.panel1.Controls.Add(this.btnTurnOn);
-            this.panel1.Location = new System.Drawing.Point(545, 41);
+            this.panel1.Location = new System.Drawing.Point(545, 67);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(462, 378);
+            this.panel1.Size = new System.Drawing.Size(462, 352);
             this.panel1.TabIndex = 2;
             // 
             // myAMC
             // 
             this.myAMC.Enabled = true;
-            this.myAMC.Location = new System.Drawing.Point(1, 0);
+            this.myAMC.Location = new System.Drawing.Point(1, 18);
             this.myAMC.Name = "myAMC";
             this.myAMC.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("myAMC.OcxState")));
-            this.myAMC.Size = new System.Drawing.Size(460, 372);
+            this.myAMC.Size = new System.Drawing.Size(460, 354);
             this.myAMC.TabIndex = 1;
             // 
             // btnScan
@@ -480,9 +488,9 @@
             // 
             // pictureBoxSensor
             // 
-            this.pictureBoxSensor.Location = new System.Drawing.Point(1, 3);
+            this.pictureBoxSensor.Location = new System.Drawing.Point(1, 18);
             this.pictureBoxSensor.Name = "pictureBoxSensor";
-            this.pictureBoxSensor.Size = new System.Drawing.Size(460, 372);
+            this.pictureBoxSensor.Size = new System.Drawing.Size(460, 357);
             this.pictureBoxSensor.TabIndex = 2;
             this.pictureBoxSensor.TabStop = false;
             // 
@@ -1042,7 +1050,7 @@
             // 
             this.trackTraj.Location = new System.Drawing.Point(548, 12);
             this.trackTraj.Name = "trackTraj";
-            this.trackTraj.Size = new System.Drawing.Size(83, 21);
+            this.trackTraj.Size = new System.Drawing.Size(66, 21);
             this.trackTraj.TabIndex = 74;
             this.trackTraj.Text = "Track Traj";
             this.trackTraj.UseVisualStyleBackColor = true;
@@ -1060,11 +1068,82 @@
             // 
             // trackTrajNumber
             // 
-            this.trackTrajNumber.Location = new System.Drawing.Point(637, 12);
+            this.trackTrajNumber.Location = new System.Drawing.Point(620, 12);
             this.trackTrajNumber.Name = "trackTrajNumber";
             this.trackTrajNumber.Size = new System.Drawing.Size(36, 20);
             this.trackTrajNumber.TabIndex = 76;
             this.trackTrajNumber.TextChanged += new System.EventHandler(this.trackTrajNumber_TextChanged);
+            // 
+            // iPhoneHeading
+            // 
+            this.iPhoneHeading.Location = new System.Drawing.Point(740, 12);
+            this.iPhoneHeading.Name = "iPhoneHeading";
+            this.iPhoneHeading.Size = new System.Drawing.Size(52, 20);
+            this.iPhoneHeading.TabIndex = 77;
+            this.iPhoneHeading.TextChanged += new System.EventHandler(this.iPhoneHeading_TextChanged);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
+            // RotOnSpot
+            // 
+            this.RotOnSpot.Location = new System.Drawing.Point(662, 11);
+            this.RotOnSpot.Name = "RotOnSpot";
+            this.RotOnSpot.Size = new System.Drawing.Size(73, 20);
+            this.RotOnSpot.TabIndex = 78;
+            this.RotOnSpot.Text = "RotOnSpot";
+            this.RotOnSpot.UseVisualStyleBackColor = true;
+            this.RotOnSpot.Click += new System.EventHandler(this.RotOnSpot_Click);
+            // 
+            // autoModeText
+            // 
+            this.autoModeText.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.autoModeText.Location = new System.Drawing.Point(450, 5);
+            this.autoModeText.Name = "autoModeText";
+            this.autoModeText.Size = new System.Drawing.Size(28, 29);
+            this.autoModeText.TabIndex = 79;
+            // 
+            // Follow
+            // 
+            this.Follow.Location = new System.Drawing.Point(798, 40);
+            this.Follow.Name = "Follow";
+            this.Follow.Size = new System.Drawing.Size(65, 23);
+            this.Follow.TabIndex = 81;
+            this.Follow.Text = "Follow";
+            this.Follow.UseVisualStyleBackColor = true;
+            this.Follow.Click += new System.EventHandler(this.Follow_Click);
+            // 
+            // ApproachWall
+            // 
+            this.ApproachWall.Location = new System.Drawing.Point(549, 40);
+            this.ApproachWall.Name = "ApproachWall";
+            this.ApproachWall.Size = new System.Drawing.Size(65, 23);
+            this.ApproachWall.TabIndex = 82;
+            this.ApproachWall.Text = "Approach";
+            this.ApproachWall.UseVisualStyleBackColor = true;
+            this.ApproachWall.Click += new System.EventHandler(this.ApproachWall_Click);
+            // 
+            // AlignWall
+            // 
+            this.AlignWall.Location = new System.Drawing.Point(663, 40);
+            this.AlignWall.Name = "AlignWall";
+            this.AlignWall.Size = new System.Drawing.Size(65, 23);
+            this.AlignWall.TabIndex = 83;
+            this.AlignWall.Text = "Align";
+            this.AlignWall.UseVisualStyleBackColor = true;
+            this.AlignWall.Click += new System.EventHandler(this.AlignWall_Click);
+            // 
+            // FindWall
+            // 
+            this.FindWall.Location = new System.Drawing.Point(798, 11);
+            this.FindWall.Name = "FindWall";
+            this.FindWall.Size = new System.Drawing.Size(65, 23);
+            this.FindWall.TabIndex = 84;
+            this.FindWall.Text = "Find";
+            this.FindWall.UseVisualStyleBackColor = true;
+            this.FindWall.Click += new System.EventHandler(this.FindWall_Click);
             // 
             // JaguarCtrl
             // 
@@ -1072,6 +1151,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(1016, 698);
+            this.Controls.Add(this.FindWall);
+            this.Controls.Add(this.AlignWall);
+            this.Controls.Add(this.ApproachWall);
+            this.Controls.Add(this.Follow);
+            this.Controls.Add(this.autoModeText);
+            this.Controls.Add(this.RotOnSpot);
+            this.Controls.Add(this.iPhoneHeading);
             this.Controls.Add(this.trackTrajNumber);
             this.Controls.Add(this.PE);
             this.Controls.Add(this.trackTraj);
@@ -1244,6 +1330,14 @@
         private System.Windows.Forms.Button trackTraj;
         private System.Windows.Forms.Button PE;
         private System.Windows.Forms.TextBox trackTrajNumber;
+        private System.Windows.Forms.TextBox iPhoneHeading;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.Button RotOnSpot;
+        private System.Windows.Forms.TextBox autoModeText;
+        private System.Windows.Forms.Button Follow;
+        private System.Windows.Forms.Button ApproachWall;
+        private System.Windows.Forms.Button AlignWall;
+        private System.Windows.Forms.Button FindWall;
     }
 }
 

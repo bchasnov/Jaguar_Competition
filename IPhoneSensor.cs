@@ -34,7 +34,6 @@ namespace DrRobot.JaguarControl
         private double yGPSZero = 0;
 
         public double Theta(){
-            newCompass = false;
             return headingTheta;
         }
 
@@ -55,6 +54,11 @@ namespace DrRobot.JaguarControl
         public double GPSy()
         {
             return latToY(latitude) - yGPSZero;
+        }
+
+        public void resetNewCompass()
+        {
+            newCompass = false;
         }
 
         public void updateReadings()
@@ -86,7 +90,6 @@ namespace DrRobot.JaguarControl
                 {
                     Console.WriteLine(e.ToString());
                 }
-
                 switch (id)
                 {
                     case 1:

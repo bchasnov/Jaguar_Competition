@@ -70,9 +70,16 @@ namespace DrRobot.JaguarControl
         private static Pen medBluePen = new Pen(Color.LightBlue, 3);
         private static Pen medGreenPen = new Pen(Color.FromArgb(0, 255, 0), 3);
 
+        public enum AUTOMODE { TRACKTRAJ, TRACKSETPOINT, ROTONSPOT, FOLLOW_WALL, APPROACH_WALL, FIND_WALL, ALIGN_WALL };
 
-        public int AUTO_TRACKTRAJ = 0;
-        public int AUTO_TRACKSETPOINT = 1;
+        public   int AUTO_TRACKTRAJ = 0;
+        public   int AUTO_TRACKSETPOINT = 1;
+        public   int AUTO_ROTONSPOT = 2;
+        public   int AUTO_FOLLOW_WALL = 3;
+        public   int AUTO_APPROACH_WALL = 4;
+        public  int AUTO_FIND_WALL = 5;
+        public   int AUTO_ALIGN_WALL = 6;
+
         public int autoMode = 0;
 
 
@@ -244,6 +251,7 @@ namespace DrRobot.JaguarControl
             {
                 int xCenter = (int)(constxCenter - navigation.x * mapResolution);
                 int yCenter = (int)(constyCenter + navigation.y * mapResolution);
+
 
                 // Smooth?
                 g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -614,6 +622,7 @@ namespace DrRobot.JaguarControl
             string encr = rightFrontWheelMotor.encoderPos.ToString();
             string vell = (MOTDIR * leftFrontWheelMotor.encodeSpeed * leftFrontWheelMotor.encoderDir).ToString();
             string velr = (-MOTDIR * rightFrontWheelMotor.encodeSpeed * rightFrontWheelMotor.encoderDir).ToString();
+            
 
             if (InvokeRequired)
             {
@@ -628,6 +637,11 @@ namespace DrRobot.JaguarControl
                 lblEncoderPos4.Text = navigation.x.ToString();
                 lblVel4.Text = navigation.y.ToString();
                 lblTemp4.Text = navigation.t.ToString();
+
+                myUpdateGui();
+
+
+
             }
         }
 
@@ -1328,6 +1342,62 @@ namespace DrRobot.JaguarControl
 
                 navigation.map.trajectory.setTarget(Convert.ToInt16(txt.Text));
             }
+        }
+
+
+        private void myUpdateGui()
+        {
+            iPhoneHeading.Text = navigation.t_gps.ToString();
+            autoModeText.Text = autoMode.ToString();
+        }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void iPhoneHeading_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RotOnSpot_Click(object sender, EventArgs e)
+        {
+            controlMode = AUTONOMOUS;
+            autoMode = AUTO_ROTONSPOT;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ApproachWall_Click(object sender, EventArgs e)
+        {
+            controlMode = AUTONOMOUS;
+
+            autoMode = AUTO_APPROACH_WALL;
+        }
+
+        private void AlignWall_Click(object sender, EventArgs e)
+        {
+            controlMode = AUTONOMOUS;
+            autoMode = AUTO_ALIGN_WALL;
+
+        }
+
+        private void FindWall_Click(object sender, EventArgs e)
+        {
+            controlMode = AUTONOMOUS;
+            autoMode = AUTO_FIND_WALL;
+
+        }
+
+        private void Follow_Click(object sender, EventArgs e)
+        {
+            controlMode = AUTONOMOUS;
+            autoMode = AUTO_FOLLOW_WALL;
+
         }
 
     }

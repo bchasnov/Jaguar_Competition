@@ -52,7 +52,7 @@ namespace DrRobot.JaguarControl
         public double robotRadius = 0.242*1.4;//0.232
         private double angleTravelled, distanceTravelled;
         private double diffEncoderPulseL, diffEncoderPulseR;
-        private double maxVelocity = 0.25;
+        private double maxVelocity = 0.18;
         public double Kpho = 1;
         public double Kalpha = 0.51;//8
         public double Kbeta = -0.5;//-0.5//-1.0;
@@ -85,7 +85,7 @@ namespace DrRobot.JaguarControl
         //public Particle[] propagatedParticles;
         public Particle[] tempParticles;
         public int tempParticlesCount = 0;
-        public int numParticles = 10000;
+        public int numParticles = 1000;
         public double K_wheelRandomness = 0.15;//0.25
         public Random random = new Random();
         public bool newLaserData = false;
@@ -129,6 +129,8 @@ namespace DrRobot.JaguarControl
 
         IPhoneSensor iPhoneSensor = new IPhoneSensor(5555);
         Gps myGps;
+
+        int wallMode = 0;
 
         public class Node
         {
@@ -310,80 +312,77 @@ namespace DrRobot.JaguarControl
             // Run infinite Control Loop
             while (runThread)
             {
-                //Console.WriteLine(x_gps +" " + y_gps);
-                //t = iPhoneSensor.Theta();
                 globalLoopTime = DateTime.Now;
 
-                // ****************** Additional Student Code: Start ************
-
-                // Students can select what type of localization and control
-                // functions to call here. For lab 1, we just call the function
-                // WallPositioning to have the robot maintain a constant distance
-                // to the wall (see lab manual).
-                
                 // Update Sensor Readings
                 UpdateSensorMeasurements();
-
                 // Determine the change of robot position, orientation (lab 2)	
                 Boolean moved = MotionPrediction();
 
                 if (moved || correctionOverride)
                 {
-                    Console.WriteLine("Tick");
                     // Update the global state of the robot - x,y,t (lab 2)
                     LocalizeRealWithOdometry();
                     // Update the global state of the robot - x,y,t (lab 2)
                     //LocalizeRealWithIMU();
-
-
-                    //Console.WriteLine(">"+x+","+y+","+t+","+map.GetClosestWallDistance(x, y, t));
-
-
-
-                    // Estimate the global state of the robot -x_est, y_est, t_est (lab 4)
                     LocalizeEstWithParticleFilter();
                 }
 
-
-                // If using the point tracker, call the function
                 if (jaguarControl.controlMode == jaguarControl.AUTONOMOUS)
                 {
-                    if (jaguarControl.autoMode == jaguarControl.AUTO_TRACKTRAJ)
+                    if (jaguarControl.autoMode == jaguarControl.AUTO_TRACKTRAJ ||
+                        jaguarControl.autoMode == jaguarControl.AUTO_TRACKSETPOINT)
                     {
-                        TrackTrajectoryManual();
+                        if (jaguarControl.autoMode == jaguarControl.AUTO_TRACKTRAJ)
+                        {
+                            TrackTrajectoryManual();
+                        }
+                        // Check if we need to create a new trajectory
+                        if (false)//motionPlanRequired)
+                        {
+                            // Construct a new trajectory (lab 5)
+                            PRMMotionPlanner();
+                            motionPlanRequired = false;
+                        }
+
+                        // Drive the robot to a desired Point (lab 3)
+                        t_des = desiredT;
+                        x_des = desiredX;
+                        y_des = desiredY;
+
+                        Console.WriteLine(x_des + " " + y_des + " " + t_des + " ");
+
+                        FlyToSetPoint();
+                        Console.WriteLine(desiredRotRateL + " " + desiredRotRateR);
+
+                        // Follow the trajectory instead of a desired point (lab 3)
+                        //TrackTrajectory();
                     }
-                    // Check if we need to create a new trajectory
-                    if (false)//motionPlanRequired)
+                    else if (jaguarControl.autoMode == jaguarControl.AUTO_ROTONSPOT)
                     {
-                        // Construct a new trajectory (lab 5)
-                        PRMMotionPlanner();
-                        motionPlanRequired = false;
+                        t_des = desiredT;
+                        Console.WriteLine("Rot on the spot! " + t_des + " " + t + " " + desiredRotRateL + " " + desiredRotRateR);
+
+                        RotateOnTheSpot();
                     }
-
-                    // Drive the robot to a desired Point (lab 3)
-                    t_des = desiredT;
-                    x_des = desiredX;
-                    y_des = desiredY;
-
-                    FlyToSetPoint();
-
-                    // Follow the trajectory instead of a desired point (lab 3)
-                    TrackTrajectory();
-
-                    // Actuate motors based actuateMotorL and actuateMotorR
-                    if (jaguarControl.Simulating())
+                    else if (jaguarControl.autoMode == jaguarControl.AUTO_FOLLOW_WALL)
                     {
-                        CalcSimulatedMotorSignals();
-                        ActuateMotorsWithVelControl();
+                        FollowWall(1.0,100);
                     }
-                    else 
+                    else if (jaguarControl.autoMode == jaguarControl.AUTO_ALIGN_WALL)
                     {
-                        // Determine the desired PWM signals for desired wheel speeds
-                        CalcMotorSignals_ben();
-                        ActuateMotorsWithPWMControl();
+                        AlignWall(50);
                     }
-
+                    else if (jaguarControl.autoMode == jaguarControl.AUTO_FIND_WALL)
+                    {
+                        FindWall(1.0, 1500);
+                    }
+                    else if (jaguarControl.autoMode == jaguarControl.AUTO_APPROACH_WALL)
+                    {
+                        ApproachWall(1.0, 0.10, 800);
+                    }
                 }
+
                 else
                 {
                     e_sum_L = 0;
@@ -391,6 +390,22 @@ namespace DrRobot.JaguarControl
                 }
                 
                 // ****************** Additional Student Code: End   ************
+
+                if (jaguarControl.controlMode == jaguarControl.AUTONOMOUS)
+                {
+                    // Actuate motors based actuateMotorL and actuateMotorR
+                    if (jaguarControl.Simulating())
+                    {
+                        CalcSimulatedMotorSignals();
+                        ActuateMotorsWithVelControl();
+                    }
+                    else
+                    {
+                        // Determine the desired PWM signals for desired wheel speeds
+                        CalcMotorSignals_ben();
+                        ActuateMotorsWithPWMControl();
+                    }
+                }
 
                 // Log data
                 LogData();
@@ -419,8 +434,6 @@ namespace DrRobot.JaguarControl
             }
             accCalib_x = accCalib_x / numMeasurements;
             accCalib_y = accCalib_y /numMeasurements;
-
-
         }
 
 
@@ -473,10 +486,6 @@ namespace DrRobot.JaguarControl
             }
         }
 
-
-
-
-
         // At every iteration of the control loop, this function will make 
         // sure all the sensor measurements are up to date before
         // makeing control decisions.
@@ -497,7 +506,7 @@ namespace DrRobot.JaguarControl
             x_gps = myGps.getX();
             y_gps = myGps.getY();
 
-            Console.WriteLine(iPhoneSensor.latitude + " " + iPhoneSensor.longitude + " " + x_gps + " " + y_gps);
+            //Console.WriteLine(iPhoneSensor.latitude + " " + iPhoneSensor.longitude + " " + x_gps + " " + y_gps);
 
             // For simulations, update the simulated measurements
             if (jaguarControl.Simulating())
@@ -551,6 +560,7 @@ namespace DrRobot.JaguarControl
             motorSignalR = (short)(desiredRotRateR);
 
         }
+
         public void CalcMotorSignals_josh()
         {
             Console.WriteLine("calcmotorsignals");
@@ -588,7 +598,6 @@ namespace DrRobot.JaguarControl
             e_sum_L = Math.Max(-maxErr, Math.Min(0.90 * e_sum_L + e_L * deltaT, maxErr));
 
         }
-
 
         public void CalcMotorSignals_ben()
         {
@@ -734,40 +743,201 @@ namespace DrRobot.JaguarControl
         // This function is called at every iteration of the control loop
         // It will drive the robot forward or backward to position the robot 
         // 1 meter from the wall.
-        private void WallPositioning()
+
+        int ense = 0;
+        private void ApproachWall(double goal, double k, double tol)
         {
+            // try k = 0.2;
 
-            // Here is the distance measurement for the central laser beam 
-            double centralLaserRange = LaserData[113];
+            // distance measurement for the central laser beam 
+            double centralLaserRange = LaserData[114];
 
-            // ****************** Additional Student Code: Start ************
+            double diff = Math.Abs(centralLaserRange - goal * 1000);
+            if ((diff > tol) && (diff < 99999))
+            {
+                desiredRotRateR = (short)(Math.Min(Math.Max(200, k * (centralLaserRange - goal * 1000)), 700));
+                desiredRotRateL = (short)(desiredRotRateR);  //+ odometry correction
+            }
 
-            // Put code here to calculated motorSignalR and 
-            // motorSignalL. Make sure the robot does not exceed 
-            // maxVelocity!!!!!!!!!!!!
+            else if (centralLaserRange < goal * 1000)
+            {
+                desiredRotRateL = 0;
+                desiredRotRateR = 0;
+                wallMode = 1;
+            }
 
-            // Send Control signals, put negative on left wheel control
+            else if (centralLaserRange >= 99999)
+            {
+                moveForward(300);
+            }
 
- 
+            // if the robot is within 0.2m tolerance then stop
+            else
+            {
+                desiredRotRateR = 0;
+                desiredRotRateL = 0;
+                wallMode = 1;
+            }
 
-            // ****************** Additional Student Code: End   ************                
+            ense++;
+
+            Console.WriteLine("centralLaserRange " + centralLaserRange + " diff: " + diff + " desired rotation: " + desiredRotRateR + ">>" + ense);
+
+        }
+
+        private void AlignWall(double rotRate)
+        {
+            double upperLaserRange = LaserData[42];   //laser scan corresponding to 15 degs
+            double lowerLaserRange = LaserData[15];   //~227 total laser scans across 240 deg
+            // corresponds to -15 degs
+            double diff = Math.Abs(upperLaserRange - lowerLaserRange);
+
+
+            if ((upperLaserRange < 99999) || (lowerLaserRange < 99999))
+            {
+                if (diff > 500)
+                {
+                    desiredRotRateR = (short)(rotRate);
+                    desiredRotRateL = (short)(-rotRate);
+                }
+                else
+                {
+                    desiredRotRateR = 0;
+                    desiredRotRateL = 0;
+                    wallMode = 2;
+                }
+            }
+            else if ((upperLaserRange >= 99999) && (lowerLaserRange >= 99999))
+            {
+                desiredRotRateR = (short)(rotRate);
+                desiredRotRateL = (short)(-rotRate);
+            }
+            else
+            {
+                Console.WriteLine("shouldn't happen");
+            }
+
+            Console.WriteLine("upperLaserRange: " + upperLaserRange + " lowerLaserRange: " + lowerLaserRange + " diff: " + diff);
+            Console.WriteLine("rot rate: " + desiredRotRateR);
+        }
+
+        private void FollowWall(double distanceGoal, double speed)//double k, double ksmall)
+        {
+            double middleLaserRange = LaserData[30];   // laser scan corresponding to 0 degs
+            double upperLaserRange = LaserData[42];   //laser scan corresponding to 15 degs
+            double lowerLaserRange = LaserData[15];   //corresponds to -15 degs
+
+            //double goalFromAngled = distanceGoal/Math.Cos(15.0 * Math.PI/180);
+
+            //only along a wall on the right 
+
+            double tolFromWall = 1500;
+
+            //near a wall, stay near
+            if ((upperLaserRange <= distanceGoal + tolFromWall) && (lowerLaserRange <= distanceGoal + tolFromWall))
+            {
+
+                if ((upperLaserRange - lowerLaserRange) >= 40)
+                {
+                    moveRight(speed);
+                }
+                else if ((lowerLaserRange - upperLaserRange) >= 40)
+                {
+                    moveLeft(speed);
+                }
+                else
+                {
+                    moveForward(250);
+                }
+            }
+
+            //if the robot just passes a wall for example, move slowly
+            else if ((upperLaserRange > distanceGoal + tolFromWall) && (lowerLaserRange < distanceGoal + tolFromWall))
+            {
+                moveForward(100);
+            }
+
+
+            //if no longer near the wall, stop
+            else if ((upperLaserRange > distanceGoal + tolFromWall) && (lowerLaserRange > distanceGoal + tolFromWall))
+            {
+                desiredRotRateL = 0;
+                desiredRotRateR = 0;
+                wallMode = 3;
+            }
+
+
+            else
+            {
+                Console.WriteLine("weird shit going on");
+            }
+
+            Console.WriteLine("upper laser: " + upperLaserRange + " lower laser: " + lowerLaserRange + " Lrot rate: " + desiredRotRateL + " RrotRate: " + desiredRotRateR);
+
+
+        }
+
+        private void FindWall(double distanceGoal, double tol)
+        {
+            double upperLaserRange = LaserData[42];   //laser scan corresponding to 15 degs
+            double middleLaserRange = LaserData[30];  // laser scan corresponding to 0 degrees
+            double lowerLaserRange = LaserData[15];   //~227 total laser scans across 240 deg
+
+
+            // if no wall in sight move forward
+            if (middleLaserRange > distanceGoal * 1000 + tol)
+            {
+                moveForward(300);
+            }
+
+
+            // if far-ish from wall move right
+            else if ((middleLaserRange < distanceGoal * 1000 + tol) && (middleLaserRange > distanceGoal * 1000 + 500))
+            {
+                moveRight(100);
+            }
+
+            //when nearish to wall follow wall
+            else
+            {
+                Console.WriteLine("switch to wall follow");
+                wallMode = 1;
+            }
+
+
+
+            Console.WriteLine("middle: " + middleLaserRange + "LrotRate" + desiredRotRateL + "Rrot rate" + desiredRotRateR);
+        }
+
+        public void moveForward(double speed)
+        {
+            desiredRotRateL = (short)speed;
+            desiredRotRateR = (short)speed;
+        }
+
+        public void moveRight(double speed)
+        {
+            desiredRotRateL = (short)(speed * 1.25);
+            desiredRotRateR = (short)(speed);
         }
 
 
+        public void moveLeft(double speed)
+        {
+            desiredRotRateL = (short)(speed);
+            desiredRotRateR = (short)(speed * 1.25);
+
+        }
         // This function is called at every iteration of the control loop
         // if used, this function can drive the robot to any desired
         // robot state. It does not check for collisions
         private void FlyToSetPoint()
         {
-
-            // ****************** Additional Student Code: Start ************
-            // ****************** Additional Student Code: Start ************
             int dir = 1;
 
             double dx = x_des - x;
             double dy = y_des - y;
             
-
             double a = -1.0 * t + Math.Atan2(dy, dx);
             if (a < -Math.PI / 2 || a > Math.PI / 2)
             {
@@ -783,24 +953,15 @@ namespace DrRobot.JaguarControl
             v = dir * v;
             double w = Kalpha * a + Kbeta * b; //set rotation to w
 
-
-
-
             double w2 = 0.5 * (w + v / robotRadius); //Left rotation
             double w1 = 0.5 * (w - v / robotRadius); //Right rotation
 
             double phi1 = -1.0 * robotRadius * w1 / wheelRadius;
             double phi2 = robotRadius * w2 / wheelRadius;
-
             double pulsePerMeter = pulsesPerRotation / (wheelRadius * 2 * Math.PI);
-
 
             desiredRotRateL = (short)(phi1 * pulsePerMeter);
             desiredRotRateR = (short)(phi2 * pulsePerMeter);
-
-
-
-            // ****************** Additional Student Code: End   ************
         }
 
         public Boolean initFlyToSetPoint;
@@ -821,7 +982,7 @@ namespace DrRobot.JaguarControl
 
         public Boolean hasStartedTrackingTrajectory;
         public double trajThresh = 0.5;
-        // THis function is called to follow a trajectory constructed by PRMMotionPlanner()
+
         private void TrackTrajectoryManual()
         {
             if (map.trajectory.empty())
@@ -853,7 +1014,6 @@ namespace DrRobot.JaguarControl
 
         }
 
-
         // THis function is called to follow a trajectory constructed by PRMMotionPlanner()
         private void TrackTrajectory()
         {
@@ -883,6 +1043,37 @@ namespace DrRobot.JaguarControl
         // This function houses the core motion planner. This function
         // will generate a new trajectory when called. Students must 
         // add their code here.
+
+        public int rotateMin = 700;
+        public int rotateK = 1000;
+
+        private void RotateOnTheSpot()
+        {
+            double tWant = boundAngle(t_des, 2);
+            double tNow = boundAngle(t_gps, 2);
+
+            double tDiff = tWant - tNow;
+
+            if (tDiff < -Math.PI) tDiff += 2 * Math.PI;
+            if (tDiff > Math.PI) tDiff -= 2 * Math.PI;
+
+            Console.WriteLine(tDiff);
+
+            short sign = 1; 
+            if (tDiff < 0) sign = -1;
+
+            double mag = sign * Math.Max(rotateMin, rotateK * Math.Abs(tDiff));
+
+            desiredRotRateL = (short)(-1 * mag);
+            desiredRotRateR = (short)mag;
+
+            if (Math.Abs(t_gps-t_des) <= 0.05)
+            {
+                desiredRotRateL = 0;
+                desiredRotRateR = 0;
+                //jaguarControl.controlMode = jaguarControl.MANUAL;
+            }
+        }
 
         private void PRMMotionPlanner()
         {
@@ -980,9 +1171,6 @@ namespace DrRobot.JaguarControl
 
         }
 
-
-
-
         // This function is used to implement weighted sampling in 
         // when randomly selecting nodes to expand from in the PRM.
         // The work environment is divided into a grid of cells.
@@ -1058,9 +1246,6 @@ namespace DrRobot.JaguarControl
 
             return;
         }
-
-
- 
 
 
         #endregion
@@ -1149,9 +1334,10 @@ namespace DrRobot.JaguarControl
             t = t + angleTravelled;
             if (iPhoneSensor.newCompass)
             {
-                //t = iPhoneSensor.Theta();
+                //t = t_gps;
+                iPhoneSensor.resetNewCompass();
             }
-            //Console.WriteLine(t);
+            Console.WriteLine(t);
 
             if (t > Math.PI)
             {
